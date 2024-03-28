@@ -1,0 +1,30 @@
+name: Sample Hadolint CI
+
+on:
+  push:
+    paths:
+      - "Dockerfile"
+      - ".hadolint.yaml"
+      - ".github/workflows/sample.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Hadolint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Hadolint
+        id: hadolint
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+          config: .hadolint.yaml
+      - name: Show Hadolint Reference
+        if: ${{ failure() && steps.hadolint.outcome == 'failure' }}
+        run: |
+          echo "========= 警告発生 ========="
+          echo "Dockerfileの静的解析で警告が発生しています。以下を参考に修正してください。"
+          echo "https://github.com/hadolint/hadolint/wiki"
+          echo "理由があって修正が難しい場合は、.hadolint.yaml にignore追記してください。"
